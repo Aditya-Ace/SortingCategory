@@ -2,55 +2,62 @@ import React, { Component } from "react";
 
 class App extends Component {
   state = {
-    categoryName: "",
-    subCategoryName: "",
     categories: [],
-    subCategories: [{ name: "" }],
+    category: "",
+    subCategories: [""],
     searchResult: []
   };
 
-  handleInputChange = e => {
+  handleChangeSubCategory = (e, index) => {
+    let subCategories = [...this.state.subCategories];
+    subCategories[index] = e.target.value;
     this.setState({
-      [e.target.name]: e.target.value
+      subCategories: [...subCategories]
     });
   };
-
-  handleCategoryNameChange = idx => evt => {
-    const newCategory = this.state.subCategories.map((subCat, sidx) => {
-      if (idx !== sidx) return subCat;
-      return { ...subCat, name: evt.target.value };
+  handleChange = e => {
+    let value = e.target.value;
+    this.setState({
+      category: value
     });
-    this.setState({ subCategories: newCategory });
   };
-
+  addSubCategory = e => {
+    this.setState({
+      subCategories: [...this.state.subCategories, ""]
+    });
+  };
   handleSubmit = e => {
     e.preventDefault();
     this.setState({
-      categories: [...this.state.categories, this.state.categoryName]
+      categories: [...this.state.categories, this.state.category]
     });
+
+    console.log(this.state);
+
+    //Api Calls
+    //Then empty out the State
+    // this.setState({
+    //   category: "",
+    //   subCategories: [""]
+    // });
   };
 
-  handleRemoveCategory = idx => () => {
+  removeSubCategory = index => {
     this.setState({
-      subCategories: this.state.subCategories.filter((s, sidx) => idx !== sidx)
+      subCategories: this.state.subCategories.filter((subCat, i) => index !== i)
     });
   };
 
   filterList = event => {
-    let item = event.target.value.toLowerCase();
-    const values = this.state.categories.concat(this.state.subCategories);
-    values.filter(value => {
-      return value.name.toLowerCase().search(item) !== -1;
-    });
-
+    let item = event.target.value;
+    item.toLowerCase();
+    let values = [...this.state.categories, ...this.state.subCategories].filter(
+      value => {
+        return value.toLowerCase().search(item) !== -1;
+      }
+    );
     this.setState({
       searchResult: values
-    });
-  };
-
-  addSubCategory = () => {
-    this.setState({
-      subCategories: this.state.subCategories.concat([{ name: "" }])
     });
   };
 
@@ -60,104 +67,106 @@ class App extends Component {
         <div className="row">
           <div className="col s12">
             <div className="card-panel">
-              <h4 className="grey-text">Category</h4>
-              <input
-                type="text"
-                placeholder="Search your way through..."
-                onChange={this.filterList}
-              />
-              <a
-                href="#modal1"
-                className="btn category__btn modal-trigger"
-                type="button"
-              >
-                New Category
-              </a>
+              <h1 className="mainHeader">Categories App</h1>
+              <div className="addcategory__btn">
+                <button data-target="modal1" className="btn modal-trigger">
+                  New Category
+                </button>
+              </div>
+              {/* Modal */}
               <div id="modal1" className="modal">
                 <div className="modal-content">
+                  <h1 className="mainHeader">Add Categories</h1>
                   <form onSubmit={this.handleSubmit}>
                     <div className="input-field col s12">
                       <input
+                        placeholder="Add Category"
                         id="category"
-                        placeholder="Enter Category Name"
-                        name="categoryName"
                         type="text"
+                        value={this.state.category}
+                        name="category"
                         className="validate"
-                        value={this.state.categoryName}
-                        onChange={this.handleInputChange}
+                        onChange={this.handleChange}
                       />
-                      <label htmlFor="category">Category Name</label>
                     </div>
-                    {this.state.searchResult.map(value => {
-                      return <p>{value}</p>;
-                    })}
-                    {this.state.subCategories.map((input, i) => {
+                    {this.state.subCategories.map((subCategory, index) => {
                       return (
-                        <div className="input-field col s12">
+                        <div key={index} className="input-field col s12">
                           <input
-                            placeholder="Enter Sub Category Name"
-                            value={input.name}
+                            placeholder="Add Sub Category"
+                            id={`sub${index}`}
+                            data-id={index}
                             type="text"
+                            name="subCategoryName"
                             className="validate"
-                            onChange={this.handleCategoryNameChange(i)}
+                            onChange={e =>
+                              this.handleChangeSubCategory(e, index)
+                            }
                           />
-                          <button
-                            className="btn"
-                            onClick={this.handleRemoveCategory(i)}
-                          >
-                            Remove
-                          </button>
+                          {index > 0 && (
+                            <button
+                              onClick={() => this.removeSubCategory(index)}
+                              className="btn"
+                              type="button"
+                            >
+                              -
+                            </button>
+                          )}
                         </div>
                       );
                     })}
                     <button
-                      type="button"
-                      onClick={this.addSubCategory}
+                      onClick={e => this.addSubCategory(e)}
                       className="btn"
+                      type="button"
                     >
-                      Add Category
+                      Add Sub Category
                     </button>
-                    <br />
-                    <br />
-                    <button type="submit" className="btn modal-close">
+                    <button
+                      style={{ marginLeft: "3em" }}
+                      type="submit"
+                      className="btn modal-close"
+                    >
                       Add
                     </button>
                   </form>
                 </div>
-                <div className="modal-footer"></div>
               </div>
-              <table className="responsive-table tablebox">
+              <input
+                type="text"
+                placeholder="Search anything in your categories"
+                onChange={this.filterList}
+              />
+              {this.state.searchResult.map((res, i) => (
+                <p key={i}>{res}</p>
+              ))}
+              <table className="highlight responsive-table">
                 <thead>
                   <tr>
-                    <th>S.No.</th>
-                    <th>Category</th>
-                    <th>Sub Category</th>
+                    <th>S.No</th>
+                    <th>Categories</th>
+                    <th>Sub Categories</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {this.state.categories.length > 0 &&
-                    this.state.categories.map((category, i) => {
-                      return (
-                        <>
-                          <tr>
-                            <td>{i + 1}</td>
-                            <td>{category}</td>
-                            <td>
-                              {this.state.subCategories.map(subCat => {
-                                return <td>{subCat.name}</td>;
-                              })}
-                            </td>
-                            <td>
-                              <button>Edit</button>
-                            </td>
-                            <td>
-                              <button>Delete</button>
-                            </td>
-                          </tr>
-                        </>
-                      );
-                    })}
+                  {this.state.categories.map((category, index) => {
+                    return (
+                      <tr>
+                        <td>{index + 1}</td>
+                        <td>{category}</td>
+                        <td>
+                          {this.state.subCategories.map((subcat, i) => (
+                            <p key={i}>{subcat}</p>
+                          ))}
+                        </td>
+                        <td>
+                          <button>Edit</button>
+                          <button>Delete</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

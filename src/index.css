@@ -5,13 +5,17 @@ body {
 }
 
 .main__container {
-  margin-top: 5em;
-}
-
-.tablebox {
-  margin-top: 3em;
-}
-
-.category__btn {
   margin-top: 2em;
+  padding: 5em;
+  width: 100%;
+}
+
+.mainHeader {
+  font-size: 2rem;
+  font-weight: 500;
+  color: #cecece;
+}
+
+.addcategory__btn {
+  margin-left: 60em;
 }
